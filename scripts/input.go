@@ -1,6 +1,7 @@
 package scripts
 
 import (
+	"context"
 	"errors"
 	"strconv"
 	"tg-bot/client/telegram"
@@ -12,27 +13,24 @@ var ErrSessionTimeout = errors.New("session is closed")
 
 // TODO: Обработать закрытие контекста
 func Input(client telegram.Client, chatId int, ch chan telegram.UpdateEntity, msg string) (telegram.UpdateEntity, error) {
-	timeout := false
+	ctx, cancel := context.WithCancel(context.Background())
 
 	client.SendMessage(strconv.Itoa(chatId), msg)
 
 	go func() {
-		time.Sleep(5 * time.Second)
-		timeout = true
-		ch <- telegram.UpdateEntity{}
+		time.Sleep(10 * time.Second)
+		cancel()
 	}()
 
-	if upd, opened := <-ch; opened {
+	select {
+	case <-ctx.Done():
+		client.SendMessage(strconv.Itoa(chatId), ExpiredSessionMSG)
+		return telegram.UpdateEntity{}, ErrSessionTimeout
+	case upd, opened := <-ch:
+		if opened {
 
-		if timeout {
-			client.SendMessage(strconv.Itoa(chatId), `
-🚫 Время ожидания истекло.
-
-➡️ Введите команду снова.`)
-			return upd, ErrSessionTimeout
+			return upd, nil
 		}
-
-		return upd, nil
 	}
 
 	return telegram.UpdateEntity{}, ErrSessionClosed

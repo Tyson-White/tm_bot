@@ -50,7 +50,7 @@ func (l *Listener) filterUpdates(updates []telegram.UpdateEntity) []telegram.Upd
 
 	for _, upd := range updates {
 		updTime := time.Unix(int64(upd.Message.Date), 0)
-		updExpireTime := updTime.Add(time.Duration(l.timeSleep) * time.Millisecond)
+		updExpireTime := updTime.Add(time.Duration(l.timeSleep+1000) * time.Millisecond)
 
 		if updExpireTime.After(time.Now()) {
 			filtred = append(filtred, upd)

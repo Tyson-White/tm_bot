@@ -1,5 +1,20 @@
 package telegram
 
+import "net/http"
+
+type Client struct {
+	protocol string
+	host     string
+	baseUrl  string
+	client   http.Client
+}
+
+type SendMessageBody struct {
+	Chat string `json:"chat_id"`
+	Text string `json:"text"`
+	Mode string `json:"parse_mode"`
+}
+
 type UpdateEntity struct {
 	ID      int           `json:"update_id"`
 	Message MessageEntity `json:"message"`

@@ -4,17 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
 )
-
-type Client struct {
-	protocol string
-	host     string
-	baseUrl  string
-	client   http.Client
-}
 
 const (
 	getUpdatesMethod  = "getUpdates"
@@ -31,12 +25,44 @@ func New(token string) Client {
 	}
 }
 
+func (c *Client) doRequest(httpMethod string, apiMethod string, query url.Values, body any) ([]byte, error) {
+
+	url := &url.URL{
+		Scheme:   c.protocol,
+		Host:     c.host,
+		Path:     c.makePath(apiMethod),
+		RawQuery: query.Encode(),
+	}
+
+	b, _ := json.Marshal(body)
+
+	req, _ := http.NewRequest(httpMethod, url.String(), bytes.NewBuffer(b))
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := c.client.Do(req)
+
+	if err != nil {
+		return nil, err
+	}
+
+	rBody, err := io.ReadAll(resp.Body)
+
+	log.Println(string(rBody))
+
+	if err != nil {
+		return nil, err
+	}
+
+	return rBody, nil
+
+}
+
 func (c *Client) Updates(offset int) ([]UpdateEntity, error) {
 
 	q := url.Values{}
 	q.Add("offset", strconv.Itoa(offset))
 
-	resp, err := c.doRequest(getUpdatesMethod, q, nil)
+	resp, err := c.doRequest(http.MethodGet, getUpdatesMethod, q, nil)
 
 	if err != nil {
 		return nil, err
@@ -52,50 +78,39 @@ func (c *Client) Updates(offset int) ([]UpdateEntity, error) {
 
 }
 
-func (c *Client) doRequest(apiMethod string, query url.Values, body any) ([]byte, error) {
-
-	url := &url.URL{
-		Scheme:   c.protocol,
-		Host:     c.host,
-		Path:     c.makePath(apiMethod),
-		RawQuery: query.Encode(),
-	}
-
-	bodyBytes, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest(http.MethodGet, url.String(), bytes.NewReader(bodyBytes))
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := c.client.Do(req)
-
-	if err != nil {
-		return nil, err
-	}
-
-	rBody, err := io.ReadAll(resp.Body)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return rBody, nil
-
-}
-
 func (c *Client) SendMessage(chatId, msg string) (MessageEntity, error) {
 	q := url.Values{}
 
 	q.Add("chat_id", chatId)
 	q.Add("text", msg)
 
-	resp, err := c.doRequest(sendMessageMethod, q, nil)
+	resp, err := c.doRequest(http.MethodGet, sendMessageMethod, q, nil)
 
 	if err != nil {
+		return MessageEntity{}, err
+	}
+
+	var data MessageEntity
+
+	err = json.Unmarshal(resp, &data)
+
+	if err != nil {
+		return MessageEntity{}, err
+	}
+
+	return data, nil
+}
+
+func (c *Client) SendFMessage(chatId, msg string) (MessageEntity, error) {
+
+	resp, err := c.doRequest(http.MethodPost, sendMessageMethod, nil, SendMessageBody{
+		Chat: chatId,
+		Text: msg,
+		Mode: "HTML",
+	})
+
+	if err != nil {
+
 		return MessageEntity{}, err
 	}
 

@@ -1,8 +1,8 @@
 package create_task
 
 import (
+	"fmt"
 	"strconv"
-	"tg-bot/client/telegram"
 	"tg-bot/scripts"
 	"tg-bot/scripts/task"
 	"tg-bot/types"
@@ -15,31 +15,62 @@ func New(params types.ScriptInitParams) types.ScriptCommandHandler {
 }
 
 func (com *Command) Run() {
+	// TODO: Добавить проверку, что человек состоит в группе, в которую хочет отправить задачу
 
-	updTitle, err := scripts.Input(com.Client, com.Session.User.ID, com.Session.In, task.TaskTitleMSG)
-
-	if err != nil {
-		return
-	}
-
-	updText, err := scripts.Input(com.Client, com.Session.User.ID, com.Session.In, task.TaskTextMSG)
+	updTitle, err := scripts.Input(com.Client, com.Session, task.TaskTitleMSG)
 
 	if err != nil {
 		return
 	}
 
-	saveErr := com.SaveTask(updTitle.Message.Text, updText.Message.Text)
+	updText, err := scripts.Input(com.Client, com.Session, task.TaskTextMSG)
+
+	if err != nil {
+		return
+	}
+
+	updGroup, err := scripts.Input(com.Client, com.Session, task.TaskGroupMSG)
+
+	if err != nil {
+		return
+	}
+
+	t, saveErr := com.Storage.SaveTask(
+		com.Session.User.Username,
+		updTitle.Message.Text, updText.Message.Text,
+		updGroup.Message.Text,
+	)
 
 	if saveErr != nil {
 		com.Client.SendMessage(strconv.Itoa(com.Session.User.ID), task.CreateTaskErrorMSG)
+		return
 	} else {
 		com.Client.SendMessage(strconv.Itoa(com.Session.User.ID), task.CreateTaskSuccessMSG)
 	}
 
-}
+	usersIntoGroup, err := com.Storage.UsersByGroup(updGroup.Message.Text)
 
-func (com *Command) SaveTask(title, desc string) error {
-	err := com.Storage.SaveTask(telegram.FormatUsername(com.Session.User.Username), title, desc)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
-	return err
+	for _, id := range usersIntoGroup {
+		fmt.Println(id)
+
+		// if com.Session.User.ID == id {
+		// 	continue
+		// }
+
+		msg := fmt.Sprintf(`
+		
+		Новая задача для группы *%v*
+
+		%v
+		
+		`, updGroup.Message.Text, t.ToString())
+
+		com.Client.SendFMessage(strconv.Itoa(id), msg)
+
+	}
 }

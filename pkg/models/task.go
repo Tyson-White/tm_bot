@@ -5,12 +5,12 @@ import (
 )
 
 type Task struct {
-	ID          int    `json:"id"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	CreatedAt   string `json:"created_at" db:"created_at"`
-	GroupId     *int   `json:"group_id" db:"group_id"`
-	Owner       string `json:"owner"`
+	ID          int     `json:"id" db:"id"`
+	Title       string  `json:"title" db:"title"`
+	Description string  `json:"description" db:"description"`
+	CreatedAt   string  `json:"created_at" db:"created_at"`
+	Group       *string `json:"groupname" db:"groupname"`
+	Owner       string  `json:"owner" db:"owner"`
 }
 
 func (t *Task) ToString() string {
@@ -20,7 +20,7 @@ func (t *Task) ToString() string {
 	Описание: 
 	%v
 
-	🔗 Создал: %v
+	🔗 Создал: @%v
 
 	🕝 Создана %v
 	

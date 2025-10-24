@@ -3,13 +3,12 @@
 SELECT 'up SQL query';
 -- +goose StatementEnd
 
-TRUNCATE TABLE task;
-ALTER TABLE task ADD COLUMN owner varchar(32) not null;
+ALTER TABLE task_group
+ADD CONSTRAINT task_group_name_key UNIQUE (name);
 
 -- +goose Down
 -- +goose StatementBegin
 SELECT 'down SQL query';
 -- +goose StatementEnd
 
-ALTER TABLE task DROP COLUMN owner;
-
+ALTER TABLE task_group DROP CONSTRAINT task_group_name_key;

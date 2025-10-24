@@ -3,7 +3,6 @@ package all_tasks
 import (
 	"fmt"
 	"strconv"
-	"tg-bot/client/telegram"
 	"tg-bot/scripts/task"
 	"tg-bot/types"
 )
@@ -16,7 +15,7 @@ func New(params types.ScriptInitParams) types.ScriptCommandHandler {
 
 func (c *Command) Run() {
 
-	tasks, err := c.Storage.Tasks(telegram.FormatUsername(c.Session.User.Username))
+	tasks, err := c.Storage.Tasks(c.Session.User.Username)
 
 	if err != nil {
 		fmt.Println(err)

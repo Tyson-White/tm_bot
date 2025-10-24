@@ -3,13 +3,15 @@
 SELECT 'up SQL query';
 -- +goose StatementEnd
 
-TRUNCATE TABLE task;
-ALTER TABLE task ADD COLUMN owner varchar(32) not null;
+CREATE TABLE t_user (
+	id serial PRIMARY KEY NOT NULL,
+	telegram_id int UNIQUE NOT NULL,
+	username varchar(33) UNIQUE NOT NULL
+);
 
 -- +goose Down
 -- +goose StatementBegin
 SELECT 'down SQL query';
 -- +goose StatementEnd
 
-ALTER TABLE task DROP COLUMN owner;
-
+DROP TABLE t_user;

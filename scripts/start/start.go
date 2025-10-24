@@ -12,5 +12,5 @@ func New(params types.ScriptInitParams) types.ScriptCommandHandler {
 }
 
 func (c *Command) Run() {
-	c.Client.SendMessage(strconv.Itoa(c.Session.User.ID), StartMsg)
+	c.Client.SendFMessage(strconv.Itoa(c.Session.User.ID), StartMsg)
 }

@@ -12,5 +12,6 @@ func New(params types.ScriptInitParams) types.ScriptCommandHandler {
 }
 
 func (c *Command) Run() {
-	c.Client.SendFMessage(strconv.Itoa(c.Session.User.ID), StartMsg)
+	c.Client.SendPhoto(strconv.Itoa(c.Session.User.ID), "./assets/welcome.png", StartMSG)
+	c.Client.SendFMessage(strconv.Itoa(c.Session.User.ID), InfoMSG)
 }

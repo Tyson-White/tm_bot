@@ -17,6 +17,8 @@ func New(params types.ScriptInitParams) types.ScriptCommandHandler {
 func (com *Command) Run() {
 	// TODO: Добавить проверку, что человек состоит в группе, в которую хочет отправить задачу
 
+	// image := "./assets/create_task.png"
+
 	updTitle, err := scripts.Input(com.Client, com.Session, task.TaskTitleMSG)
 
 	if err != nil {

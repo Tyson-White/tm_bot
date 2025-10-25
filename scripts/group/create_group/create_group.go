@@ -17,15 +17,19 @@ func New(params types.ScriptInitParams) types.ScriptCommandHandler {
 }
 
 func (com *Command) Run() {
+	params := scripts.InputParams{
+		Client:  com.Client,
+		Session: com.Session,
+		Msg:     GroupNameMSG,
+	}
 
-	nameUpd, err := scripts.Input(com.Client, com.Session, GroupNameMSG)
-
+	nameUpd, err := scripts.Input(params)
 	if err != nil {
 		return
 	}
 
-	usersUpd, err := scripts.Input(com.Client, com.Session, UsersMSG)
-
+	params.Msg = UsersMSG
+	usersUpd, err := scripts.Input(params)
 	if err != nil {
 		return
 	}

@@ -25,15 +25,15 @@ func (p *PostgresProvider) CreateGroup(name, creator string) (models.TaskGroup, 
 }
 
 func (p *PostgresProvider) Groups(username string) ([]models.TaskGroup, error) {
-	var data []models.TaskGroup
+	var userGroups []models.TaskGroup
 
-	err := p.DB.Select(&data, "SELECT * FROM task_group WHERE creator=$1", username)
+	err := p.DB.Select(&userGroups, "SELECT * FROM users_group WHERE username=$1", username)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return data, nil
+	return userGroups, nil
 
 }
 

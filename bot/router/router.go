@@ -15,11 +15,10 @@ import (
 )
 
 var commands = map[string]types.ScriptFunc{
-	"/start":        start.New,
-	"/create_task":  create_task.New,
-	"/tasks":        all_tasks.New,
-	"/create_group": create_group.New,
-	// my_groups
+	"/start":         start.New,
+	"/create_task":   create_task.New,
+	"/tasks":         all_tasks.New,
+	"/create_group":  create_group.New,
 	"/accept_invite": accept_invite.New,
 	"/invites":       my_invites.New,
 	// invite

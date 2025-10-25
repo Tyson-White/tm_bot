@@ -41,8 +41,13 @@ func (c *Command) Run() {
 }
 
 func (c *Command) checkInvitation() (models.Invite, error) {
-	upd, err := scripts.Input(c.Client, c.Session, GroupNameMSG)
+	params := scripts.InputParams{
+		Client:  c.Client,
+		Session: c.Session,
+		Msg:     GroupNameMSG,
+	}
 
+	upd, err := scripts.Input(params)
 	if err != nil {
 		return models.Invite{}, err
 	}
@@ -50,7 +55,6 @@ func (c *Command) checkInvitation() (models.Invite, error) {
 	id, err := strconv.Atoi(upd.Message.Text)
 
 	if err != nil {
-		log.Println(err)
 		c.Client.SendMessage(strconv.Itoa(c.Session.User.ID), ErrIdNotInt)
 		return models.Invite{}, err
 	}
@@ -58,8 +62,6 @@ func (c *Command) checkInvitation() (models.Invite, error) {
 	invite, err := c.Storage.InviteById(id, c.Session.User.Username)
 
 	if err != nil {
-		log.Println(err)
-
 		if errors.Is(err, sql.ErrNoRows) {
 			c.Client.SendMessage(strconv.Itoa(c.Session.User.ID), ErrIdNotInt)
 			return models.Invite{}, err

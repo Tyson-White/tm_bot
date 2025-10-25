@@ -15,24 +15,27 @@ func New(params types.ScriptInitParams) types.ScriptCommandHandler {
 }
 
 func (com *Command) Run() {
+	params := scripts.InputParams{
+		Client:    com.Client,
+		Session:   com.Session,
+		Msg:       task.TaskTitleMSG,
+		PhotoPath: "./assets/create_task.png",
+	}
 	// TODO: Добавить проверку, что человек состоит в группе, в которую хочет отправить задачу
 
-	// image := "./assets/create_task.png"
-
-	updTitle, err := scripts.Input(com.Client, com.Session, task.TaskTitleMSG)
-
+	updTitle, err := scripts.Input(params)
 	if err != nil {
 		return
 	}
 
-	updText, err := scripts.Input(com.Client, com.Session, task.TaskTextMSG)
-
+	params.Msg = task.TaskTextMSG
+	updText, err := scripts.Input(params)
 	if err != nil {
 		return
 	}
 
-	updGroup, err := scripts.Input(com.Client, com.Session, task.TaskGroupMSG)
-
+	params.Msg = task.TaskGroupMSG
+	updGroup, err := scripts.Input(params)
 	if err != nil {
 		return
 	}

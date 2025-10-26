@@ -6,6 +6,8 @@ import (
 	"tg-bot/client/telegram"
 	"tg-bot/scripts/group/accept_invite"
 	"tg-bot/scripts/group/create_group"
+	"tg-bot/scripts/group/invite"
+	"tg-bot/scripts/group/my_groups"
 	"tg-bot/scripts/group/my_invites"
 	"tg-bot/scripts/start"
 	"tg-bot/scripts/task/all_tasks"
@@ -19,10 +21,10 @@ var commands = map[string]types.ScriptFunc{
 	"/create_task":   create_task.New,
 	"/tasks":         all_tasks.New,
 	"/create_group":  create_group.New,
+	"/groups":        my_groups.New,
 	"/accept_invite": accept_invite.New,
 	"/invites":       my_invites.New,
-	// invite
-
+	"/invite":        invite.New,
 }
 
 type Router struct {
@@ -47,7 +49,12 @@ func (r *Router) Start(ch <-chan []telegram.UpdateEntity) {
 		for _, upd := range updates {
 
 			// TODO: Обработать ситуацию, когда в функции позникает ошибка
-			r.defineUser(upd.Message.From)
+			err := r.defineUser(upd.Message.From)
+
+			if err != nil {
+
+				continue
+			}
 
 			if strings.HasPrefix(upd.Message.Text, "/") {
 				r.commandsHandler(upd)

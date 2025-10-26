@@ -2,17 +2,25 @@ package postgres
 
 import "tg-bot/pkg/models"
 
-func (p *PostgresProvider) CreateInvite(groupId int, creator, invited string) (bool, error) {
+func (p *PostgresProvider) CreateInvite(groupname, creator, invited string) error {
+	// Группа существует
+	// Creator это вдажелец группы
 
-	_, err := p.DB.Exec(`
-		INSERT INTO invite(group_id, creator, invited) VALUES($1, $2, $3)
-	`, groupId, creator, invited)
+	var group models.TaskGroup
+
+	err := p.DB.Get(&group, `SELECT * FROM task_group WHERE name=$1 AND creator=$2`, groupname, creator)
 
 	if err != nil {
-		return false, err
+		return err
 	}
 
-	return true, nil
+	_, err = p.DB.Exec("INSERT INTO invite(groupname, creator, invited) VALUES($1, $2, $3)", groupname, creator, invited)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (p *PostgresProvider) InvitesByCreator(username string) ([]models.Invite, error) {

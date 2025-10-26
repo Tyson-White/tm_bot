@@ -13,7 +13,7 @@ func (inv *Invite) ToString() string {
 
 	return fmt.Sprintf(`
 		Приглашение %d
-		Группа: %d
+		Группа: %v
 		Пригласивший: @%v
-	`, inv.ID, inv.Group, inv.Invited)
+	`, inv.ID, inv.Group, inv.Creator)
 }

@@ -17,7 +17,7 @@ func (com *Command) Run() {
 
 	if err != nil {
 		log.Println(err)
-		com.Client.SendMessage(strconv.Itoa(com.Session.User.ID), ErrInvites)
+		com.Client.SendFMessage(strconv.Itoa(com.Session.User.ID), ErrInvites)
 		return
 	}
 
@@ -27,5 +27,5 @@ func (com *Command) Run() {
 		msg += inv.ToString()
 	}
 
-	com.Client.SendMessage(strconv.Itoa(com.Session.User.ID), msg)
+	com.Client.SendFMessage(strconv.Itoa(com.Session.User.ID), msg)
 }

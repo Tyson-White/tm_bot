@@ -14,19 +14,22 @@ type Task struct {
 }
 
 func (t *Task) ToString() string {
+
+	group := "Нет"
+
+	if t.Group != nil {
+		group = *t.Group
+	}
 	return fmt.Sprintf(`
-	Задача: %v
-	
-	Описание: 
-	%v
-
-	🔗 Создал: @%v
-
-	🕝 Создана %v
-	
-	`,
+🗃️ Задача: <b><u>%v</u></b>
+<blockquote expandable><b>Описание</b>
+%v</blockquote>
+ID <code>%v</code>
+Группа: %v
+Создатель: @%v`,
 		t.Title,
 		t.Description,
-		t.Owner,
-		t.CreatedAt)
+		t.ID,
+		group,
+		t.Owner)
 }

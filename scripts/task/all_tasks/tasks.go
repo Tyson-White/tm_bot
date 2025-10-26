@@ -19,15 +19,15 @@ func (c *Command) Run() {
 
 	if err != nil {
 		fmt.Println(err)
-		c.Client.SendMessage(strconv.Itoa(c.Session.User.ID), task.GetTasksErrorMSG)
+		c.Client.SendFMessage(strconv.Itoa(c.Session.User.ID), task.GetTasksErrorMSG)
 	}
 
-	response := "📋 Вот твои задачи: \n"
+	msg := "<b>📋 Вот твои задачи: </b>\n"
+	c.Client.SendPhoto(strconv.Itoa(c.Session.User.ID), "./assets/tasks.png", msg)
 
 	for _, t := range tasks {
-		response += t.ToString()
-	}
+		c.Client.SendFMessage(strconv.Itoa(c.Session.User.ID), t.ToString())
 
-	c.Client.SendMessage(strconv.Itoa(c.Session.User.ID), response)
+	}
 
 }

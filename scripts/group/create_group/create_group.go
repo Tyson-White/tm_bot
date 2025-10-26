@@ -18,9 +18,10 @@ func New(params types.ScriptInitParams) types.ScriptCommandHandler {
 
 func (com *Command) Run() {
 	params := scripts.InputParams{
-		Client:  com.Client,
-		Session: com.Session,
-		Msg:     GroupNameMSG,
+		Client:    com.Client,
+		Session:   com.Session,
+		Msg:       GroupNameMSG,
+		PhotoPath: "./assets/create_group.png",
 	}
 
 	nameUpd, err := scripts.Input(params)
@@ -38,7 +39,7 @@ func (com *Command) Run() {
 
 	if err != nil {
 
-		com.Client.SendMessage(strconv.Itoa(com.Session.User.ID), GroupCreateErr)
+		com.Client.SendFMessage(strconv.Itoa(com.Session.User.ID), GroupCreateErr)
 		return
 	}
 
@@ -50,7 +51,7 @@ func (com *Command) Run() {
 	for _, us := range users {
 		if strings.HasPrefix(us, "@") {
 			// delete this prefix
-			_, err := com.Storage.CreateInvite(group.ID, com.Session.User.Username, us[1:])
+			err := com.Storage.CreateInvite(group.Name, com.Session.User.Username, us[1:])
 
 			if err != nil {
 				failedInvites = append(failedInvites, us)
@@ -61,13 +62,10 @@ func (com *Command) Run() {
 		}
 	}
 
-	com.Client.SendMessage(strconv.Itoa(com.Session.User.ID), fmt.Sprintf(`
-		Создана группа
-		%v
-		Приглашены: %v
-		Не удалось пригласить: %v
-
-	`, group.ToString(), invited, failedInvites))
+	com.Client.SendFMessage(strconv.Itoa(com.Session.User.ID), fmt.Sprintf(`
+Создана группа
+%v Приглашены: %v
+`, group.ToString(), invited, failedInvites))
 
 	// TODO: Отправлять приглашения пользователям
 
@@ -83,7 +81,7 @@ func (com *Command) sendInviteMessage(username string, group models.TaskGroup) {
 
 	log.Println(user)
 
-	com.Client.SendMessage(strconv.Itoa(user.Telegram), fmt.Sprintf(`
+	com.Client.SendFMessage(strconv.Itoa(user.Telegram), fmt.Sprintf(`
 		Вас пригласили в группу
 
 		%v

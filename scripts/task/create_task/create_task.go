@@ -47,10 +47,11 @@ func (com *Command) Run() {
 	)
 
 	if saveErr != nil {
-		com.Client.SendMessage(strconv.Itoa(com.Session.User.ID), task.CreateTaskErrorMSG)
+		com.Client.SendFMessage(strconv.Itoa(com.Session.User.ID), task.CreateTaskErrorMSG)
 		return
 	} else {
-		com.Client.SendMessage(strconv.Itoa(com.Session.User.ID), task.CreateTaskSuccessMSG)
+		com.Client.SendPhoto(strconv.Itoa(com.Session.User.ID), "./assets/success.png", task.CreateTaskSuccessMSG)
+		com.Client.SendFMessage(strconv.Itoa(com.Session.User.ID), t.ToString())
 	}
 
 	usersIntoGroup, err := com.Storage.UsersByGroup(updGroup.Message.Text)
@@ -69,8 +70,7 @@ func (com *Command) Run() {
 
 		msg := fmt.Sprintf(`
 		
-		Новая задача для группы *%v*
-
+		Новая задача для группы <b>%v</b>
 		%v
 		
 		`, updGroup.Message.Text, t.ToString())

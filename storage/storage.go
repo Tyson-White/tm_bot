@@ -26,14 +26,14 @@ type StorageMethods interface {
 	// CompleteTask()
 
 	CreateGroup(name, creator string) (models.TaskGroup, error)
-	Groups(username string) ([]models.TaskGroup, error)
+	MyGroups(username string) ([]models.TaskGroup, error)
 	AddUserToGroup(username string, group string) (bool, error)
 	UsersByGroup(group string) ([]int, error)
 	// DeleteGroup()
 
 	UserByName(username string) (models.TUser, error)
 
-	CreateInvite(groupId int, creator, invited string) (bool, error)
+	CreateInvite(groupname, creator, invited string) error
 	// InvitesByName(username string) ([]models.Invite, error)
 	InviteById(id int, username string) (models.Invite, error)
 	MyInvites(username string) ([]models.Invite, error)

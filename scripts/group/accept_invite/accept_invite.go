@@ -30,11 +30,11 @@ func (c *Command) Run() {
 	_, err = c.Storage.AddUserToGroup(c.Session.User.Username, invite.Group)
 
 	if err != nil {
-		c.Client.SendMessage(strconv.Itoa(c.Session.User.ID), ErrGroupCreate)
+		c.Client.SendFMessage(strconv.Itoa(c.Session.User.ID), ErrGroupCreate)
 		return
 	}
 
-	c.Client.SendMessage(strconv.Itoa(c.Session.User.ID), fmt.Sprintf(`
+	c.Client.SendFMessage(strconv.Itoa(c.Session.User.ID), fmt.Sprintf(`
 	Теперь ты состоишь в группе %v
 	`, invite.Group))
 
@@ -55,7 +55,7 @@ func (c *Command) checkInvitation() (models.Invite, error) {
 	id, err := strconv.Atoi(upd.Message.Text)
 
 	if err != nil {
-		c.Client.SendMessage(strconv.Itoa(c.Session.User.ID), ErrIdNotInt)
+		c.Client.SendFMessage(strconv.Itoa(c.Session.User.ID), ErrIdNotInt)
 		return models.Invite{}, err
 	}
 
@@ -63,11 +63,11 @@ func (c *Command) checkInvitation() (models.Invite, error) {
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			c.Client.SendMessage(strconv.Itoa(c.Session.User.ID), ErrIdNotInt)
+			c.Client.SendFMessage(strconv.Itoa(c.Session.User.ID), ErrIdNotInt)
 			return models.Invite{}, err
 		}
 
-		c.Client.SendMessage(strconv.Itoa(c.Session.User.ID), e.ErrServerMSG)
+		c.Client.SendFMessage(strconv.Itoa(c.Session.User.ID), e.ErrServerMSG)
 		return models.Invite{}, err
 	}
 

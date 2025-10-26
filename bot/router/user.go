@@ -5,7 +5,7 @@ import (
 	"tg-bot/client/telegram"
 )
 
-func (r *Router) defineUser(user telegram.UserEntity) {
+func (r *Router) defineUser(user telegram.UserEntity) error {
 	userExists, err := r.storage.UserExists(user.ID)
 
 	if err != nil {
@@ -19,4 +19,6 @@ func (r *Router) defineUser(user telegram.UserEntity) {
 			log.Printf("New user in system: %v", user.Username)
 		}
 	}
+
+	return nil
 }

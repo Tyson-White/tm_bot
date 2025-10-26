@@ -10,9 +10,10 @@ type TaskGroup struct {
 
 func (t *TaskGroup) ToString() string {
 	return fmt.Sprintf(`
-	Группа: %d
-	Название: %v
 
-	Создатель - %v
-	`, t.ID, t.Name, t.Creator)
+👥 Группа: <b><u>%v</u></b>
+
+ID <code>%v</code>
+Создатель - @%v
+`, t.Name, t.ID, t.Creator)
 }

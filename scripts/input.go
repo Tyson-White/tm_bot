@@ -36,7 +36,7 @@ func Input(params InputParams) (telegram.UpdateEntity, error) {
 
 	select {
 	case <-ctx.Done():
-		params.Client.SendMessage(strconv.Itoa(params.Session.User.ID), ExpiredSessionMSG)
+		params.Client.SendFMessage(strconv.Itoa(params.Session.User.ID), ExpiredSessionMSG)
 		return telegram.UpdateEntity{}, ErrSessionTimeout
 	case upd, opened := <-params.Session.In:
 		if opened {

@@ -22,9 +22,9 @@ func New() PostgresProvider {
 
 func (pg *PostgresProvider) Connect() *sqlx.DB {
 
-	user, psw, db := pg.mustConnectionParams()
+	user, port, psw, db := pg.mustConnectionParams()
 
-	connStr := fmt.Sprintf("user=%v password=%v dbname=%v sslmode=disable", user, psw, db)
+	connStr := fmt.Sprintf("user=%v port=%v password=%v dbname=%v sslmode=disable", user, port, psw, db)
 
 	d, err := sqlx.Connect("postgres", connStr)
 
@@ -37,7 +37,7 @@ func (pg *PostgresProvider) Connect() *sqlx.DB {
 	return d
 }
 
-func (pg *PostgresProvider) mustConnectionParams() (string, string, string) {
+func (pg *PostgresProvider) mustConnectionParams() (string, string, string, string) {
 	if err := godotenv.Load(); err != nil {
 		log.Fatalln("Postgres env inititialize error", err)
 	}
@@ -45,7 +45,8 @@ func (pg *PostgresProvider) mustConnectionParams() (string, string, string) {
 	user, uEx := os.LookupEnv("DB_USER")
 	db, dbEx := os.LookupEnv("DB_NAME")
 	psw, pswEx := os.LookupEnv("DB_PASSWORD")
-
+	port, portEx := os.LookupEnv("DB_PORT")
+	
 	if !uEx || !dbEx || !pswEx {
 		log.Fatalln("Missed env variables")
 	}
@@ -54,5 +55,9 @@ func (pg *PostgresProvider) mustConnectionParams() (string, string, string) {
 		log.Fatalln("Variables can't be empty")
 	}
 
-	return user, psw, db
+	if port == "" || !portEx {
+		port = "5432"
+	}
+
+	return user, port, psw, db
 }

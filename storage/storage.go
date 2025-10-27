@@ -21,7 +21,7 @@ func New(provider StorageMethods) Storage {
 type StorageMethods interface {
 	Connect() *sqlx.DB
 	SaveTask(owner, title, desc, group string) (models.Task, error)
-	Tasks(user string) ([]models.Task, error)
+	Tasks(user string, groupname string) ([]models.Task, error)
 	// DeleteTask()
 	// CompleteTask()
 
@@ -33,7 +33,7 @@ type StorageMethods interface {
 
 	UserByName(username string) (models.TUser, error)
 
-	CreateInvite(groupname, creator, invited string) error
+	CreateInvite(groupname, creator, invited string) (int, error)
 	// InvitesByName(username string) ([]models.Invite, error)
 	InviteById(id int, username string) (models.Invite, error)
 	MyInvites(username string) ([]models.Invite, error)

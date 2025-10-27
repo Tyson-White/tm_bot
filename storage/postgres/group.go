@@ -1,7 +1,6 @@
 package postgres
 
 import (
-	"log"
 	"tg-bot/pkg/models"
 )
 
@@ -56,28 +55,16 @@ func (p *PostgresProvider) AddUserToGroup(username string, group string) (bool, 
 }
 
 func (p *PostgresProvider) UsersByGroup(group string) ([]int, error) {
-	var data []string
+	var data []int
 
-	err := p.DB.Select(&data, "SELECT username FROM users_group WHERE groupname=$1", group)
+	err := p.DB.Select(&data, `
+	SELECT t_user.telegram_id FROM t_user 
+    JOIN users_group ON t_user.username=users_group.username WHERE users_group.groupname=$1
+    `, group)
 
 	if err != nil {
 		return nil, err
 	}
 
-	var ids = []int{}
-
-	for _, usn := range data {
-		var id int
-
-		err := p.DB.Get(&id, "SELECT telegram_id FROM t_user WHERE username=$1", usn)
-
-		if err != nil {
-			log.Println(err, usn)
-			continue
-		}
-
-		ids = append(ids, id)
-	}
-
-	return ids, nil
+	return data, nil
 }

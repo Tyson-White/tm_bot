@@ -1,6 +1,10 @@
 package postgres
 
 import (
+	"errors"
+	"log"
+	"strings"
+	"tg-bot/pkg/e"
 	"tg-bot/pkg/models"
 
 	"github.com/jmoiron/sqlx"
@@ -9,7 +13,7 @@ import (
 func (pg *PostgresProvider) SaveTask(owner, title, desc, group string) (models.Task, error) {
 	var row *sqlx.Row
 
-	if group != "-" {
+	if group == "skip" {
 		row = pg.DB.QueryRowx(`
 			INSERT INTO task(title, description, owner) values($1, $2, $3)
 			RETURNING id, title, description, created_at, groupname, owner
@@ -26,20 +30,29 @@ func (pg *PostgresProvider) SaveTask(owner, title, desc, group string) (models.T
 	err := row.StructScan(&task)
 
 	if err != nil {
-		return models.Task{}, err
+		if strings.Contains(err.Error(), "constraint") {
+			return models.Task{}, e.ErrGroupNotFound
+		}
+
+		return models.Task{}, errors.Join(e.ErrServerError, err)
 	}
 
 	return task, nil
 }
 
-func (pg *PostgresProvider) Tasks(owner string) ([]models.Task, error) {
+func (pg *PostgresProvider) Tasks(user string, groupname string) ([]models.Task, error) {
 	tasks := []models.Task{}
 
-	err := pg.DB.Select(&tasks, "SELECT * FROM task WHERE owner=$1", owner)
+	err := pg.DB.Select(&tasks, `
+	SELECT DISTINCT t.* FROM task AS t 
+	JOIN users_group AS ug ON t.groupname=ug.groupname WHERE ug.groupname = $1 AND ug.username = $2
+             `, groupname, user)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(e.ErrServerError, err)
 	}
+
+	log.Println(len(tasks))
 
 	return tasks, nil
 }

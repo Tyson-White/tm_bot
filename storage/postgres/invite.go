@@ -2,7 +2,11 @@ package postgres
 
 import "tg-bot/pkg/models"
 
-func (p *PostgresProvider) CreateInvite(groupname, creator, invited string) error {
+type Invite struct {
+	Id int `db:"id"`
+}
+
+func (p *PostgresProvider) CreateInvite(groupname, creator, invited string) (int, error) {
 	// Группа существует
 	// Creator это вдажелец группы
 
@@ -11,16 +15,22 @@ func (p *PostgresProvider) CreateInvite(groupname, creator, invited string) erro
 	err := p.DB.Get(&group, `SELECT * FROM task_group WHERE name=$1 AND creator=$2`, groupname, creator)
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	_, err = p.DB.Exec("INSERT INTO invite(groupname, creator, invited) VALUES($1, $2, $3)", groupname, creator, invited)
+	row := p.DB.QueryRowx("INSERT INTO invite(groupname, creator, invited) VALUES($1, $2, $3) RETURNING id", groupname, creator, invited)
+
+	var invite Invite
+
+	if err := row.StructScan(&invite); err != nil {
+		return 0, err
+	}
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	return invite.Id, nil
 }
 
 func (p *PostgresProvider) InvitesByCreator(username string) ([]models.Invite, error) {

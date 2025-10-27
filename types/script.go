@@ -3,20 +3,7 @@ package types
 import (
 	"context"
 	"tg-bot/client/telegram"
-	"tg-bot/storage"
 )
-
-type ScriptCommandHandler interface {
-	Run()
-}
-
-type ScriptInitParams struct {
-	Session *Session
-	Storage storage.Storage
-	Client  telegram.Client
-}
-
-type ScriptFunc = func(ScriptInitParams) ScriptCommandHandler
 
 type Session struct {
 	ID        string

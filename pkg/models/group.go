@@ -10,7 +10,6 @@ type TaskGroup struct {
 
 func (t *TaskGroup) ToString() string {
 	return fmt.Sprintf(`
-
 👥 Группа: <b><u>%v</u></b>
 
 ID <code>%v</code>

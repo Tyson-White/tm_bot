@@ -1,36 +1,27 @@
 package router
 
 import (
+	"errors"
 	"log"
+	"strconv"
 	"strings"
 	"tg-bot/client/telegram"
-	"tg-bot/scripts/group/accept_invite"
-	"tg-bot/scripts/group/create_group"
-	"tg-bot/scripts/group/invite"
-	"tg-bot/scripts/group/my_groups"
-	"tg-bot/scripts/group/my_invites"
-	"tg-bot/scripts/start"
-	"tg-bot/scripts/task/all_tasks"
-	"tg-bot/scripts/task/create_task"
+	"tg-bot/pkg/e"
+	"tg-bot/pkg/messages"
+	"tg-bot/scripts"
+	"tg-bot/scripts/base"
+	"tg-bot/scripts/g"
+	"tg-bot/scripts/inv"
+	"tg-bot/scripts/t"
 	"tg-bot/storage"
 	"tg-bot/types"
 )
-
-var commands = map[string]types.ScriptFunc{
-	"/start":         start.New,
-	"/create_task":   create_task.New,
-	"/tasks":         all_tasks.New,
-	"/create_group":  create_group.New,
-	"/groups":        my_groups.New,
-	"/accept_invite": accept_invite.New,
-	"/invites":       my_invites.New,
-	"/invite":        invite.New,
-}
 
 type Router struct {
 	sessions map[int]*types.Session
 	storage  storage.Storage
 	client   telegram.Client
+	commands map[string]scripts.ScriptFunc
 }
 
 func New(storage storage.Storage, client telegram.Client) Router {
@@ -38,6 +29,16 @@ func New(storage storage.Storage, client telegram.Client) Router {
 		sessions: map[int]*types.Session{},
 		storage:  storage,
 		client:   client,
+		commands: map[string]scripts.ScriptFunc{
+			"/start":         base.Start,
+			"/create_task":   t.TaskCreation,
+			"/tasks":         t.UserTasks,
+			"/create_group":  g.GroupCreation,
+			"/groups":        g.UserGroups,
+			"/accept_invite": inv.InviteAcceptation,
+			"/invites":       inv.UserInvites,
+			"/invite":        inv.Invitation,
+		},
 	}
 }
 
@@ -47,14 +48,6 @@ func (r *Router) Start(ch <-chan []telegram.UpdateEntity) {
 	for {
 		updates := <-ch
 		for _, upd := range updates {
-
-			// TODO: Обработать ситуацию, когда в функции позникает ошибка
-			err := r.defineUser(upd.Message.From)
-
-			if err != nil {
-
-				continue
-			}
 
 			if strings.HasPrefix(upd.Message.Text, "/") {
 				r.commandsHandler(upd)
@@ -69,17 +62,23 @@ func (r *Router) Start(ch <-chan []telegram.UpdateEntity) {
 			}
 		}
 	}
-
 }
 
 func (r *Router) commandsHandler(update telegram.UpdateEntity) {
+	err := r.defineUser(update.Message.From)
+
+	if err != nil {
+		r.client.SendError(strconv.Itoa(update.Message.From.ID), "")
+		return
+	}
+
 	s, sessionExists := r.sessions[update.Message.From.ID]
 
 	if sessionExists {
 		s.CancelCtx()
 	}
 
-	script, scriptExists := commands[update.Message.Text]
+	script, scriptExists := r.commands[update.Message.Text]
 
 	if scriptExists {
 		// создаем новую сессию
@@ -88,7 +87,7 @@ func (r *Router) commandsHandler(update telegram.UpdateEntity) {
 		// записываем для пользователя новую сессию
 		r.sessions[update.Message.From.ID] = session
 
-		handler := script(types.ScriptInitParams{
+		handler := script(scripts.Script{
 			Session: session,
 			Storage: r.storage,
 			Client:  r.client,
@@ -100,7 +99,21 @@ func (r *Router) commandsHandler(update telegram.UpdateEntity) {
 				delete(r.sessions, update.Message.From.ID)
 
 			}()
-			handler.Run()
+			err := handler.Run()
+
+			if err != nil {
+				log.Println(err)
+				
+				if errors.Is(err, e.ErrClientError) {
+					r.client.SendError(strconv.Itoa(update.Message.From.ID), err.Error())
+				}
+				if errors.Is(err, e.ErrServerError) {
+					r.client.SendError(strconv.Itoa(update.Message.From.ID), messages.InternalError)
+
+				}
+			}
 		}()
+	} else {
+		r.client.SendError(strconv.Itoa(update.Message.From.ID), messages.CommandNotDefine)
 	}
 }

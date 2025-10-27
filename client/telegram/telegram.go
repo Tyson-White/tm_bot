@@ -3,7 +3,6 @@ package telegram
 import (
 	"bytes"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 )
@@ -65,10 +64,10 @@ func (c *Client) doRequest(params reqParams) ([]byte, error) {
 	}
 
 	rBody, err := io.ReadAll(resp.Body)
-
-	if params.apiMethod == sendPhotoMethod {
-		log.Println(params.apiMethod, string(rBody))
-	}
+	//
+	//if params.apiMethod == sendPhotoMethod {
+	//	log.Println(params.apiMethod, string(rBody))
+	//}
 
 	if err != nil {
 		return nil, err

@@ -22,8 +22,10 @@ func (t *Task) ToString() string {
 	}
 	return fmt.Sprintf(`
 🗃️ Задача: <b><u>%v</u></b>
+
 <blockquote expandable><b>Описание</b>
 %v</blockquote>
+
 ID <code>%v</code>
 Группа: %v
 Создатель: @%v`,

@@ -1,20 +1,43 @@
 package main
 
 import (
-	"tg-bot/bot"
-	"tg-bot/client/telegram"
-	"tg-bot/pkg/flgs"
-	"tg-bot/storage"
-	"tg-bot/storage/postgres"
+	"tmbot/bot"
+	"tmbot/client"
+	"tmbot/database"
+	"tmbot/services"
 )
 
 func main() {
 
-	pg := postgres.New()
-	storage := storage.New(&pg)
+	/*
 
-	tgClient := telegram.New(flgs.MustToken())
+		Бот
+			Получать сообщения (Клиент)
+			Обрабатывать сообщения (Процессор)
+			Отправлять сообщения (Клиент)
 
-	b := bot.New(tgClient, storage, 2000)
-	b.Run()
+		Клиент
+			Отправлять сообщения
+			Получать сообщения
+
+		Процессор
+			Распознать команду
+			Обработать команду (Сервис)
+
+		Сервис
+			Отправить ошибку
+			Отправить ответ на команду
+			Вести диалог
+			Взаимодействие с базой данных (Хранилище)
+
+		Хранилище
+			Подключиться к БД
+			Получить/Сохранить/Отредактировать/Удалить элемент
+	*/
+
+	db := database.NewDatabase()
+	sv := services.NewServices(db)
+	cl := client.NewClient()
+	b := bot.NewBot(cl, sv)
+	_ = b
 }

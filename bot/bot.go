@@ -1,46 +1,41 @@
 package bot
 
 import (
-	"tg-bot/bot/listener"
-	"tg-bot/bot/router"
-	"tg-bot/client/telegram"
-	"tg-bot/storage"
+	"tmbot/bot/fetcher"
+	"tmbot/bot/processor"
+	cl "tmbot/client"
+	sv "tmbot/services"
 )
 
 type Bot struct {
-	// Сервис с которым взаимодействует бот
-	Client telegram.Client
-
-	// БД куда все складируется
-	Storage storage.Storage
-
-	// В миллисекундах
-	listenerCooldown int
+	client   cl.Client
+	services sv.Services
 }
 
-func New(
-	tgClient telegram.Client,
-	storage storage.Storage,
-	sleepTime int,
-	// discordClient
-	// storage
-) Bot {
+func NewBot(client cl.Client, services sv.Services) Bot {
+	return Bot{
+		client:   client,
+		services: services,
+	}
+}
 
-	bot := Bot{
-		Client:           tgClient,
-		listenerCooldown: sleepTime,
-		Storage:          storage,
+func (b Bot) Start(token string) error {
+
+	err := b.client.Telegram.Register(token)
+
+	if err != nil {
+		return err
 	}
 
-	return bot
+	return b.listen()
 }
 
-func (b *Bot) Run() {
-	updatesChannel := make(chan []telegram.UpdateEntity)
+func (b Bot) listen() error {
 
-	l := listener.New(b.listenerCooldown, b.Client)
-	go l.Listen(updatesChannel)
+	f := fetcher.NewFetcher(b.client)
+	ch := f.Fetch()
 
-	r := router.New(b.Storage, b.Client)
-	r.Start(updatesChannel)
+	processor.NewProcessor(b.services, ch)
+
+	return nil
 }

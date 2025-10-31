@@ -7,14 +7,12 @@ import (
 type fetcher struct {
 }
 
-func NewFetcher(client cl.Client) fetcher {
+func New(client cl.Client) fetcher {
 	return fetcher{}
 }
 
-func (f *fetcher) Fetch() Channel {
-	in := make(chan []string)
+func (f *fetcher) Fetch() IncomeUpdatesPool {
+	pool := make(chan []cl.Update)
 
-	in <- []string{"s"}
-
-	return in
+	return pool
 }

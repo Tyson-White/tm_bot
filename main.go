@@ -35,9 +35,9 @@ func main() {
 			Получить/Сохранить/Отредактировать/Удалить элемент
 	*/
 
-	db := database.NewDatabase()
-	sv := services.NewServices(db)
-	cl := client.NewClient()
-	b := bot.NewBot(cl, sv)
+	postgresDB := database.NewDatabase()
+	service := services.NewServices(postgresDB)
+	telegram := client.New()
+	b := bot.NewBot(telegram, service)
 	_ = b
 }

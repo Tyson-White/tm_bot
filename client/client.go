@@ -1,22 +1,16 @@
 package client
 
-import (
-	tg "tmbot/client/telegram"
-)
+type Client struct{}
 
-type Client struct {
-	Telegram methods
+func New() Client {
+	return Client{}
 }
 
-func NewClient() Client {
-	return Client{
-		Telegram: tg.NewTelegramClient(),
-	}
+func (c Client) Register(apiBotToken string) error {
+	return nil
 }
 
-type methods interface {
-	Register(apiBotToken string) error
-	Updates()
-	SendMessage()
-	SendPhoto()
+func (c Client) Updates() {
+	//TODO implement me
+	panic("implement me")
 }

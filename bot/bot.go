@@ -13,6 +13,7 @@ type Bot struct {
 }
 
 func NewBot(client cl.Client, services sv.Services) Bot {
+
 	return Bot{
 		client:   client,
 		services: services,
@@ -21,7 +22,7 @@ func NewBot(client cl.Client, services sv.Services) Bot {
 
 func (b Bot) Start(token string) error {
 
-	err := b.client.Telegram.Register(token)
+	err := b.client.Register(token)
 
 	if err != nil {
 		return err
@@ -32,10 +33,12 @@ func (b Bot) Start(token string) error {
 
 func (b Bot) listen() error {
 
-	f := fetcher.NewFetcher(b.client)
-	ch := f.Fetch()
+	fetcherInstance := fetcher.New(b.client)
+	updatesPool := fetcherInstance.Fetch()
 
-	processor.NewProcessor(b.services, ch)
+	processorInstance := processor.New(b.services, b.client)
+
+	processorInstance.Handle(updatesPool)
 
 	return nil
 }

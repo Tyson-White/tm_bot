@@ -1,3 +1,7 @@
 package fetcher
 
-type Channel = <-chan []string
+import (
+	"tmbot/client"
+)
+
+type IncomeUpdatesPool = <-chan []client.Update

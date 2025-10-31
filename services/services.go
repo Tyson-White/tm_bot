@@ -2,21 +2,18 @@ package services
 
 import (
 	db "tmbot/database"
+	"tmbot/services/party"
+	"tmbot/services/task"
 )
 
 type Services struct {
-	Task  taskMethods
-	Party partyMethods
+	Task  *task.TaskService
+	Party *party.Party
 }
 
 func NewServices(database db.Database) Services {
-	return Services{}
-}
-
-type taskMethods interface {
-	Save()
-}
-
-type partyMethods interface {
-	Get()
+	return Services{
+		Task:  task.New(),
+		Party: party.New(),
+	}
 }
